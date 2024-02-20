@@ -2,6 +2,7 @@ using MessageBoardApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,11 +18,11 @@ builder.Services.AddAuthentication(x => {
     {
         ValidIssuer = builder.Configuration["JwtSettings:ValidIssuer"],
         ValidAudience = builder.Configuration["JwtSettings:ValidAudience"],
-        // IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]!)),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]!)),
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
-        // ValidateIssuerSigningKey = true
+        ValidateIssuerSigningKey = true
     };
 });
 
