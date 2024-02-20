@@ -4,15 +4,28 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
 using System.Text;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddDbContext<MessageBoardApiContext>(
+                dbContextOptions => dbContextOptions
+                    .UseMySql(
+                    builder.Configuration["ConnectionStrings:DefaultConnection"],
+                    ServerVersion.AutoDetect(builder.Configuration["ConnectionStrings:DefaultConnection"]
+                    )
+                )
+                );
 
-builder.Services.AddAuthentication(x => {
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<MessageBoardApiContext>()
+                .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(x =>
+{
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(x => 
+}).AddJwtBearer(x =>
 {
     x.TokenValidationParameters = new TokenValidationParameters
     {
@@ -26,25 +39,11 @@ builder.Services.AddAuthentication(x => {
     };
 });
 
-builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<MessageBoardApiContext>(
-                dbContextOptions => dbContextOptions
-                    .UseMySql(
-                    builder.Configuration["ConnectionStrings:DefaultConnection"], 
-                    ServerVersion.AutoDetect(builder.Configuration["ConnectionStrings:DefaultConnection"]
-                    )
-                )
-                );
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<MessageBoardApiContext>()
-                .AddDefaultTokenProviders();
 
 var app = builder.Build();
 
