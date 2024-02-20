@@ -1,6 +1,5 @@
 using MessageBoardApi.ViewModels;
 using MessageBoardApi.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -65,57 +64,32 @@ namespace MessageBoardApi.Controllers
 
             if (requestedUser == null)
             {
-                return BadRequest(new { status = "Error", message = $"Unable to sign in. Please check credentials and try again." });
+                return BadRequest(new { status = "Error", message = $"Unable to sign in. Please check credentials and try again. ERROR1" });
             }
 
-            Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(loginRequest.Email, loginRequest.Password, isPersistent: true, lockoutOnFailure: false);
+            Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(requestedUser, loginRequest.Password, isPersistent: true, lockoutOnFailure: false);
             if (result.Succeeded)
             {
 
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+                // var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+                // var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-                var Sectoken = new JwtSecurityToken(_config["Jwt:Issuer"],
-                _config["Jwt:Issuer"],
-                null,
-                expires: DateTime.Now.AddMinutes(120),
-                signingCredentials: credentials);
+                // var Sectoken = new JwtSecurityToken(_config["Jwt:Issuer"],
+                // _config["Jwt:Issuer"],
+                // null,
+                // expires: DateTime.Now.AddMinutes(120),
+                // signingCredentials: credentials);
 
-                var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
+                // var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
 
-                return Ok(token);
+
+
+                return Ok("token");
             }
             else
             {
-                return BadRequest(new { status = "Error", message = $"Unable to sign in. Please check credentials and try again." });
+                return BadRequest(new { status = "Error", message = $"Unable to sign in. Please check credentials and try again. ERROR2" });
             }
         }
-
-
-        // [HttpPost]
-        // public async Task<IActionResult> Register(RegisterViewModel model)
-        // {
-        //     if (!ModelState.IsValid)
-        //     {
-        //         return View(model);
-        //     }
-        //     else
-        //     {
-        //         ApplicationUser newUser = new ApplicationUser { UserName = model.Email };
-        //         IdentityResult result = await _userManager.CreateAsync(newUser, model.Password);
-        //         if (result.Succeeded)
-        //         {
-        //             return RedirectToAction("Index");
-        //         }
-        //         else
-        //         {
-        //             foreach (IdentityError error in result.Errors)
-        //             {
-        //                 ModelState.AddModelError("", error.Description);
-        //             }
-        //             return View(model);
-        //         }
-        //     }
-        // }
     }
 }
