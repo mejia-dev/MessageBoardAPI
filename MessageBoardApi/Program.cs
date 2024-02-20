@@ -26,6 +26,8 @@ builder.Services.AddAuthentication(x => {
     };
 });
 
+builder.Services.AddAuthorization();
+
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<MessageBoardApiContext>(
@@ -53,6 +55,7 @@ else
     app.UseHttpsRedirection();
 }
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
