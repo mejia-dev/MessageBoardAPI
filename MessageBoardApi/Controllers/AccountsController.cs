@@ -40,7 +40,7 @@ namespace MessageBoardApi.Controllers
 
             if (result.Succeeded)
             {
-                return Ok();
+                return Ok(new { status = "success", message = "User has been successfully created" });
             }
             else
             {
