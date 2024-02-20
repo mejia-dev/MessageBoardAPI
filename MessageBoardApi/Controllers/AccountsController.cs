@@ -71,7 +71,7 @@ namespace MessageBoardApi.Controllers
                 var Sectoken = new JwtSecurityToken(_config["JwtSettings:ValidIssuer"],
                 _config["JwtSettings:ValidIssuer"],
                 null,
-                expires: DateTime.Now.AddMinutes(120),
+                expires: DateTime.Now.AddMinutes(1),
                 signingCredentials: credentials);
 
                 var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
@@ -81,6 +81,13 @@ namespace MessageBoardApi.Controllers
             {
                 return BadRequest(new { status = "Error", message = $"Unable to sign in. Please check credentials and try again. ERROR2" });
             }
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> LogOut()
+        {
+            await _signInManager.SignOutAsync();
+            return Ok();
         }
     }
 }

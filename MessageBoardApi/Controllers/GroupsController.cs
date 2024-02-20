@@ -5,8 +5,9 @@ using MessageBoardApi.Models;
 
 namespace MessageBoardApi.Controllers
 {
-  [Route("api/[controller]")]
   [ApiController]
+  [Route("api/[controller]")]
+  [Authorize]
   public class GroupsController : ControllerBase
   {
     private readonly MessageBoardApiContext _db;
@@ -15,6 +16,7 @@ namespace MessageBoardApi.Controllers
       _db = db;
     }
 
+    
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Group>>> Get()
     {
@@ -38,6 +40,13 @@ namespace MessageBoardApi.Controllers
       _db.Groups.Add(group);
       await _db.SaveChangesAsync();
       return CreatedAtAction(nameof(GetGroup), new { id = group.GroupId }, group);
+    }
+
+    [HttpGet("test")]
+    public IActionResult Test()
+    {
+      string testString = "test";
+      return Ok(testString);
     }
   }
 }

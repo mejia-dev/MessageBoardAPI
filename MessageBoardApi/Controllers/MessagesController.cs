@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using MessageBoardApi.Models;
-
 
 namespace MessageBoardApi.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
+  [Authorize]
   public class MessagesController : ControllerBase
   {
     private readonly MessageBoardApiContext _db;
