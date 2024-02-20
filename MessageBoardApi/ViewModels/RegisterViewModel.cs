@@ -10,6 +10,10 @@ namespace MessageBoardApi.ViewModels
     public string Email { get; set; }
 
     [Required]
+    [Display(Name = "UserName")]
+    public string UserName { get; set; }
+
+    [Required]
     [DataType(DataType.Password)]
     public string Password { get; set; }
 

@@ -33,7 +33,7 @@ namespace MessageBoardApi.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterViewModel registration)
+        public async Task<IActionResult> Register(RegisterViewModel registration)
         {
             ApplicationUser userExists = await _userManager.FindByEmailAsync(registration.Email);
             if (userExists != null)
@@ -41,7 +41,7 @@ namespace MessageBoardApi.Controllers
                 return BadRequest(new { status = "Error", message = "Email has already been used for an account." });
             }
 
-            ApplicationUser newUser = new ApplicationUser() { Email = registration.Email};
+            ApplicationUser newUser = new ApplicationUser() { UserName = registration.UserName, Email = registration.Email };
             IdentityResult result = await _userManager.CreateAsync(newUser, registration.Password);
 
             if (result.Succeeded)
@@ -58,35 +58,36 @@ namespace MessageBoardApi.Controllers
         [HttpPost("signin")]
         public async Task<IActionResult> SignIn([FromBody] LoginViewModel loginRequest)
         {
-            //your logic for login process
-            //If login usrename and password are correct then proceed to generate token
-            if (!ModelState.IsValid)
+
+            #nullable enable
+            ApplicationUser? requestedUser = await _userManager.FindByEmailAsync(loginRequest.Email);
+            #nullable disable
+
+            if (requestedUser == null)
             {
-                return Unauthorized();
+                return BadRequest(new { status = "Error", message = $"Unable to sign in. Please check credentials and try again." });
+            }
+
+            Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(loginRequest.Email, loginRequest.Password, isPersistent: true, lockoutOnFailure: false);
+            if (result.Succeeded)
+            {
+
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+                var Sectoken = new JwtSecurityToken(_config["Jwt:Issuer"],
+                _config["Jwt:Issuer"],
+                null,
+                expires: DateTime.Now.AddMinutes(120),
+                signingCredentials: credentials);
+
+                var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
+
+                return Ok(token);
             }
             else
             {
-                Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(loginRequest.Email, loginRequest.Password, isPersistent: true, lockoutOnFailure: false);
-                if (result.Succeeded)
-                {
-
-                    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-                    var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-                    var Sectoken = new JwtSecurityToken(_config["Jwt:Issuer"],
-                    _config["Jwt:Issuer"],
-                    null,
-                    expires: DateTime.Now.AddMinutes(120),
-                    signingCredentials: credentials);
-
-                    var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
-
-                    return Ok(token);
-                }
-                else
-                {
-                    return Unauthorized();
-                }
+                return BadRequest(new { status = "Error", message = $"Unable to sign in. Please check credentials and try again." });
             }
         }
 
