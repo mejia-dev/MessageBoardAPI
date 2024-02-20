@@ -18,11 +18,6 @@ namespace MessageBoardApi.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-        // public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, MessageBoardApiContext db)
-        // {
-
-        // }
-
         public AccountsController(IConfiguration config, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, MessageBoardApiContext db)
         {
             _config = config;
@@ -70,21 +65,17 @@ namespace MessageBoardApi.Controllers
             Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(requestedUser, loginRequest.Password, isPersistent: true, lockoutOnFailure: false);
             if (result.Succeeded)
             {
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:SecretKey"]));
+                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-                // var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-                // var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+                var Sectoken = new JwtSecurityToken(_config["JwtSettings:ValidIssuer"],
+                _config["JwtSettings:ValidIssuer"],
+                null,
+                expires: DateTime.Now.AddMinutes(120),
+                signingCredentials: credentials);
 
-                // var Sectoken = new JwtSecurityToken(_config["Jwt:Issuer"],
-                // _config["Jwt:Issuer"],
-                // null,
-                // expires: DateTime.Now.AddMinutes(120),
-                // signingCredentials: credentials);
-
-                // var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
-
-
-
-                return Ok("token");
+                var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
+                return Ok(token);
             }
             else
             {
